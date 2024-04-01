@@ -8,8 +8,6 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singleton;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +15,9 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
-public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer<AirbyteSingleStoreTestContainer> {
+public final class AirbyteSingleStoreTestContainer extends
+    JdbcDatabaseContainer<AirbyteSingleStoreTestContainer> {
+
   private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
       "ghcr.io/singlestore-labs/singlestoredb-dev");
   static final String DEFAULT_TAG = "latest";
@@ -26,16 +26,9 @@ public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer
   private static final int DEFAULT_CONNECT_TIMEOUT_SECONDS = 120;
 
   // Container defaults
-  static final String DEFAULT_DATABASE_NAME = "s2db";
   static final String ROOT_USER = "root";
   static final String DEFAULT_ROOT_USER_PASSWORD = "root";
-
-  // Test container defaults
-
-  // Restricted user and database names
-  private static final List<String> SINGLESTORE_USERS = Arrays.asList(ROOT_USER);
-
-  private String databaseName = DEFAULT_DATABASE_NAME;
+  private String databaseName;
   private String username = ROOT_USER;
   private String password = DEFAULT_ROOT_USER_PASSWORD;
   private static final String SINGLESTORE_LICENSE = System.getenv("SINGLESTORE_LICENSE");
@@ -60,8 +53,7 @@ public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer
   }
 
   private void preconfigure() {
-    this.waitStrategy = new LogMessageWaitStrategy().withRegEx(
-            ".*Log Opened*\\s").withTimes(1)
+    this.waitStrategy = new LogMessageWaitStrategy().withRegEx(".*Log Opened*\\s").withTimes(1)
         .withStartupTimeout(Duration.of(DEFAULT_STARTUP_TIMEOUT_SECONDS, SECONDS));
     this.withConnectTimeoutSeconds(DEFAULT_CONNECT_TIMEOUT_SECONDS);
     this.addExposedPorts(PORT);
@@ -107,9 +99,6 @@ public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer
     if (StringUtils.isEmpty(username)) {
       throw new IllegalArgumentException("Username cannot be null or empty");
     }
-    if (SINGLESTORE_USERS.contains(username.toLowerCase())) {
-      throw new IllegalArgumentException("Username cannot be one of " + SINGLESTORE_USERS);
-    }
     this.username = username;
     return self();
   }
@@ -127,10 +116,6 @@ public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer
   public AirbyteSingleStoreTestContainer withDatabaseName(final String databaseName) {
     if (StringUtils.isEmpty(databaseName)) {
       throw new IllegalArgumentException("Database name cannot be null or empty");
-    }
-
-    if (DEFAULT_DATABASE_NAME.equals(databaseName.toLowerCase())) {
-      throw new IllegalArgumentException("Database name cannot be set to " + DEFAULT_DATABASE_NAME);
     }
     this.databaseName = databaseName;
     return self();
@@ -154,7 +139,7 @@ public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer
 
   @Override
   protected void configure() {
-    withEnv("ROOT_PASSWORD", password);
+    withEnv("ROOT_PASSWORD", DEFAULT_ROOT_USER_PASSWORD);
     withEnv("SINGLESTORE_LICENSE", SINGLESTORE_LICENSE);
   }
 

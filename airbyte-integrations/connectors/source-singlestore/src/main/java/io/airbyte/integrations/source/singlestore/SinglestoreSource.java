@@ -48,7 +48,6 @@ public class SinglestoreSource extends AbstractJdbcSource<JDBCType> implements S
     final StringBuilder jdbcUrl = new StringBuilder(
         String.format("jdbc:singlestore://%s:%s/%s", config.get(JdbcUtils.HOST_KEY).asText(),
             config.get(JdbcUtils.PORT_KEY).asText(), encodedDatabaseName));
-    // ensure the return year value is a Date; see the rationale
     jdbcUrl.append("?yearIsDateType=false");
     if (config.get(JdbcUtils.JDBC_URL_PARAMS_KEY) != null && !config.get(
         JdbcUtils.JDBC_URL_PARAMS_KEY).asText().isEmpty()) {

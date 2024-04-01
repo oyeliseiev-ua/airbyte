@@ -40,6 +40,8 @@ public class SingleStoreTestDatabase extends
     final var sql = Stream.of(String.format("CREATE DATABASE %s", getDatabaseName()),
         String.format("CREATE USER %s IDENTIFIED BY '%s'", getUserName(), getPassword()),
         String.format("GRANT ALL ON %s.* TO %s", getDatabaseName(), getUserName()));
+    container.withUsername(getUserName()).withPassword(getPassword())
+        .withDatabaseName(getDatabaseName());
     return Stream.of(singlestoreCmd(sql));
   }
 
