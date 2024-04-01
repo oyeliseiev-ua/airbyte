@@ -291,7 +291,7 @@ abstract public class JdbcSourceAcceptanceTest<S extends Source, T extends TestD
   protected void testDiscoverWithMultipleSchemas() throws Exception {
     // clickhouse and mysql do not have a concept of schemas, so this test does not make sense for them.
     switch (testdb.getDatabaseDriver()) {
-      case MYSQL, CLICKHOUSE, TERADATA:
+      case MYSQL, CLICKHOUSE, TERADATA, SINGLESTORE:
         return;
     }
 
@@ -750,7 +750,8 @@ abstract public class JdbcSourceAcceptanceTest<S extends Source, T extends TestD
         .map(r -> r.getRecord().getData().get(COL_NAME).asText())
         .toList();
     // some databases don't make insertion order guarantee when equal ordering value
-    if (testdb.getDatabaseDriver().equals(DatabaseDriver.TERADATA) || testdb.getDatabaseDriver().equals(DatabaseDriver.ORACLE)) {
+    if (testdb.getDatabaseDriver().equals(DatabaseDriver.TERADATA) || testdb.getDatabaseDriver().equals(DatabaseDriver.SINGLESTORE) || testdb.getDatabaseDriver()
+        .equals(DatabaseDriver.ORACLE)) {
       assertThat(List.of("a", "b"), Matchers.containsInAnyOrder(firstSyncNames.toArray()));
     } else {
       assertEquals(List.of("a", "b"), firstSyncNames);
@@ -801,8 +802,8 @@ abstract public class JdbcSourceAcceptanceTest<S extends Source, T extends TestD
         .map(r -> r.getRecord().getData().get(COL_NAME).asText())
         .toList();
 
-    // teradata doesn't make insertion order guarantee when equal ordering value
-    if (testdb.getDatabaseDriver().equals(DatabaseDriver.TERADATA)) {
+    // some databases don't make insertion order guarantee when equal ordering value
+    if (testdb.getDatabaseDriver().equals(DatabaseDriver.TERADATA) || testdb.getDatabaseDriver().equals(DatabaseDriver.SINGLESTORE)) {
       assertThat(List.of("c", "d", "e", "f"), Matchers.containsInAnyOrder(thirdSyncExpectedNames.toArray()));
     } else {
       assertEquals(List.of("c", "d", "e", "f"), thirdSyncExpectedNames);
@@ -1022,7 +1023,7 @@ abstract public class JdbcSourceAcceptanceTest<S extends Source, T extends TestD
   protected String getDefaultNamespace() {
     return switch (testdb.getDatabaseDriver()) {
       // mysql does not support schemas, it namespaces using database names instead.
-      case MYSQL, CLICKHOUSE, TERADATA -> testdb.getDatabaseName();
+      case MYSQL, CLICKHOUSE, TERADATA, SINGLESTORE -> testdb.getDatabaseName();
       default -> SCHEMA_NAME;
     };
   }
