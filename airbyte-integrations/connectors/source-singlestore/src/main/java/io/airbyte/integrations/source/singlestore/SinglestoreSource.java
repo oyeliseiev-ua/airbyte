@@ -24,7 +24,6 @@ import io.airbyte.cdk.integrations.source.jdbc.JdbcSSLConnectionUtils;
 import io.airbyte.commons.json.Jsons;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.JDBCType;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,13 +31,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SinglestoreSource extends AbstractJdbcSource<JDBCType> implements Source {
+public class SinglestoreSource extends AbstractJdbcSource<SinglestoreType> implements Source {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SinglestoreSource.class);
   public static final String DRIVER_CLASS = DatabaseDriver.SINGLESTORE.driverClassName;
 
   public SinglestoreSource() {
-    super(DRIVER_CLASS, AdaptiveStreamingQueryConfig::new, JdbcUtils.defaultSourceOperations);
+    super(DRIVER_CLASS, AdaptiveStreamingQueryConfig::new, new SinglestoreSourceOperations());
   }
 
   @Override
@@ -49,6 +48,7 @@ public class SinglestoreSource extends AbstractJdbcSource<JDBCType> implements S
         String.format("jdbc:singlestore://%s:%s/%s", config.get(JdbcUtils.HOST_KEY).asText(),
             config.get(JdbcUtils.PORT_KEY).asText(), encodedDatabaseName));
     jdbcUrl.append("?yearIsDateType=false");
+    jdbcUrl.append("&tinyInt1isBit=false");
     if (config.get(JdbcUtils.JDBC_URL_PARAMS_KEY) != null && !config.get(
         JdbcUtils.JDBC_URL_PARAMS_KEY).asText().isEmpty()) {
       jdbcUrl.append(JdbcUtils.AMPERSAND)

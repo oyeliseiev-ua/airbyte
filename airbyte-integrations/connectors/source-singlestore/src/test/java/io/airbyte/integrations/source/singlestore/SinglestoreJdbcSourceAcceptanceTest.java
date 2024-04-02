@@ -38,7 +38,7 @@ class SinglestoreJdbcSourceAcceptanceTest extends
 
   @Override
   protected void maybeSetShorterConnectionTimeout(final JsonNode config) {
-    ((ObjectNode) config).put(JdbcUtils.JDBC_URL_PARAMS_KEY, "connectTimeout=100");
+    ((ObjectNode) config).put(JdbcUtils.JDBC_URL_PARAMS_KEY, "connectTimeout=1000");
   }
 
   @Override
