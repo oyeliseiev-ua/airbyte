@@ -26,50 +26,50 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import org.junit.jupiter.api.Test;
 
-public class SinglestoreSourceOperationsTest {
+public class SingleStoreSourceOperationsTest {
 
-  private final SinglestoreSourceOperations sqlSourceOperations = new SinglestoreSourceOperations();
+  private final SingleStoreSourceOperations sqlSourceOperations = new SingleStoreSourceOperations();
 
   @Test
   public void varcharAsCursor() throws SQLException {
-    testImpl("VARCHAR(30)", i -> "test" + i, v -> v, v -> v, SinglestoreType.VARCHAR, "test1");
+    testImpl("VARCHAR(30)", i -> "test" + i, v -> v, v -> v, SingleStoreType.VARCHAR, "test1");
   }
 
   @Test
   public void dateColumnAsCursor() throws SQLException {
     testImpl("DATE", i -> LocalDate.of(2019, 1, i), DateTimeConverter::convertToDate,
-        LocalDate::toString, SinglestoreType.DATE,
+        LocalDate::toString, SingleStoreType.DATE,
         DateTimeConverter.convertToDate(LocalDate.of(2019, 1, 1)));
   }
 
   @Test
   public void timeColumnAsCursor() throws SQLException {
     testImpl("TIME", i -> LocalTime.of(20, i, 0), DateTimeConverter::convertToTime,
-        LocalTime::toString, SinglestoreType.TIME,
+        LocalTime::toString, SingleStoreType.TIME,
         DateTimeConverter.convertToTime(LocalTime.of(20, 1, 0)));
   }
 
   @Test
   public void dateTimeColumnAsCursor() throws SQLException {
     testImpl("DATETIME", i -> LocalDateTime.of(2019, i, 20, 3, 0, 0),
-        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SinglestoreType.DATETIME,
+        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SingleStoreType.DATETIME,
         DateTimeConverter.convertToTimestamp(LocalDateTime.of(2019, 1, 20, 3, 0, 0)));
   }
 
   @Test
   public void timeStampColumnAsCursor() throws SQLException {
     testImpl("TIMESTAMP", i -> LocalDateTime.of(2019, i, 20, 3, 0, 0),
-        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SinglestoreType.DATETIME,
+        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SingleStoreType.DATETIME,
         DateTimeConverter.convertToTimestamp(LocalDateTime.of(2019, 1, 20, 3, 0, 0)));
     testImpl("TIMESTAMP(6)", i -> LocalDateTime.of(2019, i, 20, 3, 0, 0),
-        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SinglestoreType.DATETIME,
+        DateTimeConverter::convertToTimestamp, LocalDateTime::toString, SingleStoreType.DATETIME,
         DateTimeConverter.convertToTimestamp(LocalDateTime.of(2019, 1, 20, 3, 0, 0)));
   }
 
 
   private <T> void testImpl(final String sqlType, IntFunction<T> recordBuilder,
       Function<T, String> airbyteRecordStringifier, Function<T, String> sqlRecordStringifier,
-      SinglestoreType singlestoreType, String initialCursorFieldValue) throws SQLException {
+      SingleStoreType singlestoreType, String initialCursorFieldValue) throws SQLException {
     final String cursorColumn = "cursor_column";
     try (final var testdb = SingleStoreTestDatabase.in(BaseImage.SINGLESTORE_DEV)
         .with("CREATE TABLE cursor_table (id INTEGER PRIMARY KEY, %s %s);", cursorColumn,

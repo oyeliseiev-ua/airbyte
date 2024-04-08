@@ -14,12 +14,12 @@ import io.airbyte.cdk.db.jdbc.JdbcUtils;
 import io.airbyte.commons.json.Jsons;
 import org.junit.jupiter.api.Test;
 
-public class SinglestoreSourceTest {
+public class SingleStoreSourceTest {
 
   private static final String EXPECTED_JDBC_ESCAPED_URL = "jdbc:singlestore://localhost:1111/db%2Ffoo?";
 
-  public SinglestoreSource source() {
-    return new SinglestoreSource();
+  public SingleStoreSource source() {
+    return new SingleStoreSource();
   }
 
   @Test
@@ -38,7 +38,7 @@ public class SinglestoreSourceTest {
             Jsons.jsonNode(ImmutableMap.of("mode", "verify-full", "client_key", "test_client_key",
                 "client_key_password", "password")))));
     String jdbcUrl = jdbcConfig.get(JdbcUtils.JDBC_URL_KEY).asText();
-    assertEquals("jdbc:singlestore://localhost:3306/db?yearIsDateType=false&sslMode=VERIFY_FULL",
+    assertEquals("jdbc:singlestore://localhost:3306/db?yearIsDateType=false&tinyInt1isBit=false&sslMode=VERIFY_FULL",
         jdbcUrl);
   }
 

@@ -107,7 +107,7 @@ public class SingleStoreSpecTest {
 
   @Test
   void testJdbcAdditionalProperty() throws Exception {
-    final ConnectorSpecification spec = new SinglestoreSource().spec();
+    final ConnectorSpecification spec = new SingleStoreSource().spec();
     assertNotNull(spec.getConnectionSpecification().get("properties").get("jdbc_url_params"));
   }
 

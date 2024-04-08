@@ -4,7 +4,7 @@ import java.sql.SQLType;
 import java.sql.Types;
 import java.util.Arrays;
 
-public enum SinglestoreType implements SQLType {
+public enum SingleStoreType implements SQLType {
   VARCHAR("VARCHAR", Types.VARCHAR),
   BIGINT("BIGINT", Types.BIGINT),
   BIGINT_UNSIGNED("BIGINT UNSIGNED", Types.BIGINT),
@@ -47,7 +47,7 @@ public enum SinglestoreType implements SQLType {
   VECTOR("VECTOR", Types.OTHER),
   NULL("NULL", Types.NULL);
 
-  SinglestoreType(String singleStoreTypeName, int type) {
+  SingleStoreType(String singleStoreTypeName, int type) {
     this.singleStoreTypeName = singleStoreTypeName;
     this.type = type;
   }
@@ -55,7 +55,7 @@ public enum SinglestoreType implements SQLType {
   private final String singleStoreTypeName;
   private final int type;
 
-  public static SinglestoreType getByName(String name) {
+  public static SingleStoreType getByName(String name) {
     return Arrays.stream(values()).filter(v -> v.getName().equalsIgnoreCase(name)).findFirst()
         .orElseThrow(() -> new IllegalArgumentException(
             "Type:" + name + " is not a valid."));
