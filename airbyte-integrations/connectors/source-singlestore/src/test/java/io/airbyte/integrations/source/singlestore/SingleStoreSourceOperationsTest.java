@@ -44,9 +44,9 @@ public class SingleStoreSourceOperationsTest {
 
   @Test
   public void timeColumnAsCursor() throws SQLException {
-    testImpl("TIME", i -> LocalTime.of(20, i, 0), DateTimeConverter::convertToTime,
-        LocalTime::toString, SingleStoreType.TIME,
-        DateTimeConverter.convertToTime(LocalTime.of(20, 1, 0)));
+    testImpl("TIME", i -> "20:0" + i + ":00", i -> i,
+        i -> i, SingleStoreType.TIME,
+        "20:01:00");
   }
 
   @Test
@@ -86,7 +86,7 @@ public class SingleStoreSourceOperationsTest {
           expectedRecords.add(jsonNode);
         }
       }
-      try (final Connection connection = testdb.container.createConnection("")) {
+      try (final Connection connection = testdb.getContainer().createConnection("")) {
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "SELECT * FROM " + testdb.getDatabaseName() + ".cursor_table WHERE " + cursorColumn
                 + " > ?");

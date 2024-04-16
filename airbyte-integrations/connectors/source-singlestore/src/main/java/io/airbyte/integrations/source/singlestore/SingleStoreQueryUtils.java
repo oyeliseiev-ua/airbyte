@@ -48,7 +48,7 @@ public class SingleStoreQueryUtils {
     LOGGER.info("Querying for max pk value: {}", maxPkQuery);
     try {
       final List<JsonNode> jsonNodes = database.bufferedResultSetQuery(conn -> conn.prepareStatement(maxPkQuery).executeQuery(),
-          JdbcUtils.defaultSourceOperations::rowToJson);
+          JdbcUtils.getDefaultSourceOperations()::rowToJson);
       Preconditions.checkState(jsonNodes.size() == 1);
       if (jsonNodes.get(0).get(MAX_PK_COL) == null) {
         LOGGER.info("Max PK is null for table {} - this could indicate an empty table", fullTableName);
@@ -91,7 +91,7 @@ public class SingleStoreQueryUtils {
         final String cursorBasedSyncStatusQuery = String.format(MAX_CURSOR_VALUE_QUERY, quotedCursorField, fullTableName, quotedCursorField,
             quotedCursorField, fullTableName);
         final List<JsonNode> jsonNodes = database.bufferedResultSetQuery(conn -> conn.prepareStatement(cursorBasedSyncStatusQuery).executeQuery(),
-            JdbcUtils.defaultSourceOperations::rowToJson);
+            JdbcUtils.getDefaultSourceOperations()::rowToJson);
         final CursorBasedStatus cursorBasedStatus = new CursorBasedStatus();
         cursorBasedStatus.setStateType(StateType.CURSOR_BASED);
         cursorBasedStatus.setStreamName(name);

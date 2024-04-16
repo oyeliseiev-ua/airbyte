@@ -15,7 +15,7 @@ data:
   githubIssueLabel: source-singlestore
   icon: singlestore.svg
   license: MIT
-  name: Singlestore
+  name: SingleStore
   releaseDate: TODO
   supportLevel: community
   releaseStage: alpha

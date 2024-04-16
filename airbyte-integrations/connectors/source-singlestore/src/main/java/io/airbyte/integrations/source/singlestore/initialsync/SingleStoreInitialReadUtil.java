@@ -4,9 +4,9 @@ import static io.airbyte.integrations.source.singlestore.initialsync.SingleStore
 import static io.airbyte.integrations.source.singlestore.initialsync.SingleStoreInitialLoadStreamStateManager.STATE_TYPE_KEY;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import io.airbyte.cdk.db.jdbc.JdbcDatabase;
 import io.airbyte.cdk.integrations.source.relationaldb.DbSourceDiscoverUtil;
-import io.airbyte.cdk.integrations.source.relationaldb.RelationalDbReadUtil;
 import io.airbyte.cdk.integrations.source.relationaldb.TableInfo;
 import io.airbyte.cdk.integrations.source.relationaldb.state.StateManager;
 import io.airbyte.commons.json.Jsons;
@@ -76,12 +76,25 @@ public class SingleStoreInitialReadUtil {
     fullCatalog.getStreams().stream()
         .filter(stream -> streamsStillInPkSync.contains(AirbyteStreamNameNamespacePair.fromAirbyteStream(stream.getStream()))).map(Jsons::clone)
         .forEach(streamsForPkSync::add);
-    final List<ConfiguredAirbyteStream> newlyAddedStreams = RelationalDbReadUtil.identifyStreamsToSnapshot(fullCatalog,
+    final List<ConfiguredAirbyteStream> newlyAddedStreams = identifyStreamsToSnapshot(fullCatalog,
         Collections.unmodifiableSet(alreadySeenStreamPairs));
     streamsForPkSync.addAll(newlyAddedStreams);
     return new InitialLoadStreams(
         streamsForPkSync.stream().filter(SingleStoreInitialReadUtil::streamHasPrimaryKey).collect(Collectors.toList()),
         pairToInitialLoadStatus);
+  }
+
+  public static List<ConfiguredAirbyteStream> identifyStreamsToSnapshot(
+      final ConfiguredAirbyteCatalog catalog,
+      final Set<AirbyteStreamNameNamespacePair> alreadySyncedStreams) {
+    final Set<AirbyteStreamNameNamespacePair> allStreams = AirbyteStreamNameNamespacePair.fromConfiguredCatalog(
+        catalog);
+    final Set<AirbyteStreamNameNamespacePair> newlyAddedStreams = new HashSet<>(
+        Sets.difference(allStreams, alreadySyncedStreams));
+    return catalog.getStreams().stream().filter(c -> c.getSyncMode() == SyncMode.INCREMENTAL)
+        .filter(stream -> newlyAddedStreams.contains(
+            AirbyteStreamNameNamespacePair.fromAirbyteStream(stream.getStream()))).map(Jsons::clone)
+        .collect(Collectors.toList());
   }
 
   // Build a map of stream <-> primary key info (primary key field name + datatype) for all streams

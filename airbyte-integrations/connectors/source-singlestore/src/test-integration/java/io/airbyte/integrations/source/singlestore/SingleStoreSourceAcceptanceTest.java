@@ -10,7 +10,9 @@ import io.airbyte.cdk.integrations.base.ssh.SshHelpers;
 import io.airbyte.cdk.integrations.standardtest.source.SourceAcceptanceTest;
 import io.airbyte.cdk.integrations.standardtest.source.TestDestinationEnv;
 import io.airbyte.commons.json.Jsons;
+import io.airbyte.commons.resources.MoreResources;
 import io.airbyte.integrations.source.singlestore.SingleStoreTestDatabase.BaseImage;
+import io.airbyte.integrations.source.singlestore.SingleStoreTestDatabase.ContainerModifier;
 import io.airbyte.protocol.models.Field;
 import io.airbyte.protocol.models.JsonSchemaType;
 import io.airbyte.protocol.models.v0.CatalogHelpers;
@@ -30,11 +32,14 @@ public class SingleStoreSourceAcceptanceTest extends SourceAcceptanceTest {
 
   @Override
   protected void setupEnvironment(final TestDestinationEnv environment) throws Exception {
-    testdb = SingleStoreTestDatabase.in(BaseImage.SINGLESTORE_DEV)
-        .with("CREATE TABLE id_and_name(id INTEGER, name VARCHAR(200));")
-        .with("INSERT INTO id_and_name (id, name) VALUES (1,'picard'),  (2, 'crusher'), (3, 'vash');")
-        .with("CREATE TABLE starships(id INTEGER, name VARCHAR(200));")
-        .with("INSERT INTO starships (id, name) VALUES (1,'enterprise-d'),  (2, 'defiant'), (3, 'yamato');");
+    testdb = createDatabase().with("CREATE TABLE id_and_name(id INTEGER, name VARCHAR(200));").with(
+            "INSERT INTO id_and_name (id, name) VALUES (1,'picard'),  (2, 'crusher'), (3, 'vash');")
+        .with("CREATE TABLE starships(id INTEGER, name VARCHAR(200));").with(
+            "INSERT INTO starships (id, name) VALUES (1,'enterprise-d'),  (2, 'defiant'), (3, 'yamato');");
+  }
+
+  protected SingleStoreTestDatabase createDatabase() {
+    return SingleStoreTestDatabase.in(BaseImage.SINGLESTORE_DEV);
   }
 
   @Override
@@ -49,12 +54,12 @@ public class SingleStoreSourceAcceptanceTest extends SourceAcceptanceTest {
 
   @Override
   protected ConnectorSpecification getSpec() throws Exception {
-    return SshHelpers.INSTANCE.getSpecAndInjectSsh();
+    return Jsons.deserialize(MoreResources.readResource("spec.json"), ConnectorSpecification.class);
   }
 
   @Override
   protected JsonNode getConfig() {
-    return testdb.integrationTestConfigBuilder().build();
+    return testdb.integrationTestConfigBuilder().withStandardReplication().build();
   }
 
   @Override

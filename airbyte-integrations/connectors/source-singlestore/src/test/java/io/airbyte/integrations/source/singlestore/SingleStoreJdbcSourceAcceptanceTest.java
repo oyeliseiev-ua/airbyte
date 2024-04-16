@@ -49,25 +49,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class SingleStoreJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest<SingleStoreSource, SingleStoreTestDatabase> {
 
   protected static final String USERNAME_WITHOUT_PERMISSION = "new_user";
   protected static final String PASSWORD_WITHOUT_PERMISSION = "new_password";
-  private static final Logger LOGGER = LoggerFactory.getLogger(SingleStoreJdbcSourceAcceptanceTest.class);
-
-  @AfterEach
-  public void tearDown() {
-    try {
-      testdb.close();
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
-    }
-  }
 
   @Override
   protected void maybeSetShorterConnectionTimeout(final JsonNode config) {
@@ -313,7 +300,7 @@ class SingleStoreJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest<Singl
     testdb.singlestoreCmd(
         Stream.of(String.format("CREATE USER '%s'@'%%' IDENTIFIED BY '%s';", usernameWithoutPermission, PASSWORD_WITHOUT_PERMISSION))).forEach(c -> {
       try {
-        testdb.container.execInContainer(c);
+        testdb.getContainer().execInContainer(c);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -388,9 +375,8 @@ class SingleStoreJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest<Singl
             .withSourceDefinedPrimaryKey(List.of(List.of(COL_FIRST_NAME), List.of(COL_LAST_NAME)))));
   }
 
-  // Override from parent class as we're no longer including the legacy Data field.
   @Override
-  protected List<AirbyteMessage> createExpectedTestMessages(final List<DbStreamState> states, final long numRecords) {
+  protected List<AirbyteMessage> createExpectedTestMessages(final List<? extends DbStreamState> states, final long numRecords) {
     return states.stream().map(s -> new AirbyteMessage().withType(Type.STATE).withState(new AirbyteStateMessage().withType(AirbyteStateType.STREAM)
             .withStream(
                 new AirbyteStreamState().withStreamDescriptor(new StreamDescriptor().withNamespace(s.getStreamNamespace()).withName(s.getStreamName()))
@@ -399,7 +385,7 @@ class SingleStoreJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest<Singl
   }
 
   @Override
-  protected List<AirbyteStateMessage> createState(final List<DbStreamState> states) {
+  protected List<AirbyteStateMessage> createState(final List<? extends DbStreamState> states) {
     return states.stream().map(s -> new AirbyteStateMessage().withType(AirbyteStateType.STREAM).withStream(
         new AirbyteStreamState().withStreamDescriptor(new StreamDescriptor().withNamespace(s.getStreamNamespace()).withName(s.getStreamName()))
             .withStreamState(Jsons.jsonNode(s)))).collect(Collectors.toList());

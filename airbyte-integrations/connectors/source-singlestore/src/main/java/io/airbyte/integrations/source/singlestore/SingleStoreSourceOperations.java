@@ -75,8 +75,7 @@ public class SingleStoreSourceOperations extends AbstractJdbcCompatibleSourceOpe
       case DECIMAL, DECIMAL_UNSIGNED -> putBigDecimal(json, columnName, resultSet, colIndex);
       case DATE -> putDate(json, columnName, resultSet, colIndex);
       case DATETIME, TIMESTAMP -> putTimestamp(json, columnName, resultSet, colIndex);
-      case TIME -> putTime(json, columnName, resultSet, colIndex);
-      case CHAR, VARCHAR, TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT, JSON, ENUM, SET -> putString(json, columnName, resultSet, colIndex);
+      case TIME, CHAR, VARCHAR, TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT, JSON, ENUM, SET -> putString(json, columnName, resultSet, colIndex);
       case NULL -> json.set(columnName, NullNode.instance);
       default -> putDefault(json, columnName, resultSet, colIndex);
     }
@@ -97,8 +96,7 @@ public class SingleStoreSourceOperations extends AbstractJdbcCompatibleSourceOpe
       case DECIMAL, DECIMAL_UNSIGNED -> setDecimal(preparedStatement, parameterIndex, value);
       case DATE -> setDate(preparedStatement, parameterIndex, value);
       case DATETIME, TIMESTAMP -> setTimestamp(preparedStatement, parameterIndex, value);
-      case TIME -> setTime(preparedStatement, parameterIndex, value);
-      case VARCHAR, TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT -> setString(preparedStatement, parameterIndex, value);
+      case TIME, VARCHAR, TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT -> setString(preparedStatement, parameterIndex, value);
       case TINYBLOB, BLOB, MEDIUMBLOB, LONGBLOB, BINARY, VARBINARY -> setBinary(preparedStatement, parameterIndex, value);
       default -> throw new IllegalArgumentException(String.format("%s cannot be used as a cursor.", cursorFieldType));
     }
@@ -129,7 +127,6 @@ public class SingleStoreSourceOperations extends AbstractJdbcCompatibleSourceOpe
           JsonSchemaType.INTEGER;
       case FLOAT, FLOAT_UNSIGNED, DOUBLE, DOUBLE_UNSIGNED, DECIMAL, DECIMAL_UNSIGNED -> JsonSchemaType.NUMBER;
       case BIT, TINYBLOB, BLOB, MEDIUMBLOB, LONGBLOB, BINARY, VARBINARY -> JsonSchemaType.STRING_BASE_64;
-      case TIME -> JsonSchemaType.STRING_TIME_WITHOUT_TIMEZONE;
       case DATETIME, TIMESTAMP -> JsonSchemaType.STRING_TIMESTAMP_WITHOUT_TIMEZONE;
       case DATE -> JsonSchemaType.STRING_DATE;
       case NULL -> JsonSchemaType.NULL;

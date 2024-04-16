@@ -1,4 +1,4 @@
-# Source Singlestore
+# Source SingleStore
 
 This is the repository for the Singlestore source connector in Java.
 For information about how to use this connector within Airbyte, see [the User Documentation](https://docs.airbyte.com/integrations/sources/singlestore).

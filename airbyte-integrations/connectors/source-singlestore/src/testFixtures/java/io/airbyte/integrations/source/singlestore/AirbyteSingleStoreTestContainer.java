@@ -15,11 +15,9 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
-public final class AirbyteSingleStoreTestContainer extends
-    JdbcDatabaseContainer<AirbyteSingleStoreTestContainer> {
+public final class AirbyteSingleStoreTestContainer extends JdbcDatabaseContainer<AirbyteSingleStoreTestContainer> {
 
-  private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
-      "ghcr.io/singlestore-labs/singlestoredb-dev");
+  private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("ghcr.io/singlestore-labs/singlestoredb-dev");
   static final String DEFAULT_TAG = "latest";
   private static final int PORT = 3306;
   private static final int DEFAULT_STARTUP_TIMEOUT_SECONDS = 300;
@@ -122,10 +120,16 @@ public final class AirbyteSingleStoreTestContainer extends
   }
 
   @Override
-  public AirbyteSingleStoreTestContainer withUrlParam(final String paramName,
-      final String paramValue) {
-    throw new UnsupportedOperationException(
-        "The SingleStore Database driver does not support this");
+  public AirbyteSingleStoreTestContainer withUrlParam(final String paramName, final String paramValue) {
+    throw new UnsupportedOperationException("The SingleStore Database driver does not support this");
+  }
+
+  public void restart() {
+    String tag = this.getContainerId();
+    dockerClient.commitCmd(this.getContainerId()).withRepository("singlestore-ssl").withTag(tag).exec();
+    this.stop();
+    this.setDockerImageName("singlestore-ssl:" + tag);
+    this.start();
   }
 
   public Integer getPort() {

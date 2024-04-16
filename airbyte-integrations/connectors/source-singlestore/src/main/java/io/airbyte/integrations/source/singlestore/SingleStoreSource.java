@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class SingleStoreSource extends AbstractJdbcSource<SingleStoreType> implements Source {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SingleStoreSource.class);
-  public static final String DRIVER_CLASS = DatabaseDriver.SINGLESTORE.driverClassName;
+  public static final String DRIVER_CLASS = DatabaseDriver.SINGLESTORE.getDriverClassName();
 
   public SingleStoreSource() {
     super(DRIVER_CLASS, AdaptiveStreamingQueryConfig::new, new SingleStoreSourceOperations());
@@ -106,14 +106,14 @@ public class SingleStoreSource extends AbstractJdbcSource<SingleStoreType> imple
   @Override
   public List<AutoCloseableIterator<AirbyteMessage>> getIncrementalIterators(final JdbcDatabase database, final ConfiguredAirbyteCatalog catalog,
       final Map<String, TableInfo<CommonField<SingleStoreType>>> tableNameToTable, final StateManager stateManager, final Instant emittedAt) {
-    final JsonNode sourceConfig = database.sourceConfig;
+    final JsonNode sourceConfig = database.getSourceConfig();
     if (SingleStoreInitialReadUtil.isAnyStreamIncrementalSyncMode(catalog)) {
       final SingleStoreCursorBasedStateManager cursorBasedStateManager = new SingleStoreCursorBasedStateManager(stateManager.getRawStateMessages(),
           catalog);
       LOGGER.info("Syncing via Primary Key");
       final InitialLoadStreams initialLoadStreams = SingleStoreInitialReadUtil.streamsForInitialPrimaryKeyLoad(stateManager, catalog);
       final Map<AirbyteStreamNameNamespacePair, CursorBasedStatus> pairToCursorBasedStatus = SingleStoreQueryUtils.getCursorBasedSyncStatusForStreams(
-          database, initialLoadStreams.streamsForInitialLoad(), stateManager, quoteString);
+          database, initialLoadStreams.streamsForInitialLoad(), stateManager, getQuoteString());
       final CursorBasedStreams cursorBasedStreams = new CursorBasedStreams(
           RelationalDbReadUtil.identifyStreamsForCursorBased(catalog, initialLoadStreams.streamsForInitialLoad()), pairToCursorBasedStatus);
 
@@ -121,7 +121,7 @@ public class SingleStoreSource extends AbstractJdbcSource<SingleStoreType> imple
       SingleStoreQueryUtils.logStreamSyncStatus(cursorBasedStreams.streamsForCursorBased(), "Cursor");
 
       final SingleStoreInitialLoadStreamStateManager singleStoreInitialLoadStreamStateManager = new SingleStoreInitialLoadStreamStateManager(
-          initialLoadStreams, SingleStoreInitialReadUtil.initPairToPrimaryKeyInfoMap(database, initialLoadStreams, tableNameToTable, quoteString));
+          initialLoadStreams, SingleStoreInitialReadUtil.initPairToPrimaryKeyInfoMap(database, initialLoadStreams, tableNameToTable, getQuoteString()));
       final SingleStoreInitialLoadHandler initialLoadHandler = new SingleStoreInitialLoadHandler(sourceConfig, database,
           new SingleStoreSourceOperations(), getQuoteString(), singleStoreInitialLoadStreamStateManager,
           namespacePair -> Jsons.jsonNode(pairToCursorBasedStatus.get(convertNameNamespacePairFromV0(namespacePair))));
